@@ -61,7 +61,7 @@ const QuizAttemptsList = () => {
 
     setStats({
       totalAttempts: total,
-      averageScore: total > 0 ? (totalScore / total).toFixed(1) : 0,
+      averageScore: total > 0 ? (totalScore / total).toFixed(1) * 10 : 0,
       completionRate: total > 0 ? ((completedAttempts / total) * 100).toFixed(1) : 0,
       avgTimeSpent: total > 0 ? Math.round(totalTime / total) : 0,
       forcedSubmissions: forcedAttempts

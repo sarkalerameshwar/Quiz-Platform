@@ -105,61 +105,10 @@ exports.getUserAttempts = async (req, res) => {
 };
 
 // Get all attempts for a quiz (for quiz creator)
-exports.getQuizAttempts = async (req, res) => {
-  try {
-    let quizId = req.params.id;
-    quizId = quizId.replace(/^:/, '');
-
-    // Validate if quizId is a valid ObjectId
-    if (!quizId.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).json({ message: 'Invalid quiz ID format' });
-    }
-
-    // Check if user is the quiz creator
-    const quiz = await Quiz.findById(quizId);
-    if (!quiz) {
-      return res.status(404).json({ message: 'Quiz not found' });
-    }
-
-    if (quiz.createdBy.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: 'Access denied' });
-    }
-
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-
-    const attempts = await Attempt.find({ quizId })
-      .populate('userId', 'username')
-      .sort({ completedAt: -1 })
-      .skip(skip)
-      .limit(limit);
-
-    const total = await Attempt.countDocuments({ quizId });
-
-    res.json({
-      attempts,
-      currentPage: page,
-      totalPages: Math.ceil(total / limit),
-      totalAttempts: total
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-};
-
-// Get a specific attempt
+// Add this to the getAttempt function
 exports.getAttempt = async (req, res) => {
   try {
-    let attemptId = req.params.attemptId;
-    attemptId = attemptId.replace(/^:/, '');
-
-    // Validate if attemptId is a valid ObjectId
-    if (!attemptId.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).json({ message: 'Invalid attempt ID format' });
-    }
-
-    const attempt = await Attempt.findById(attemptId)
+    const attempt = await Attempt.findById(req.params.attemptId)
       .populate('userId', 'username')
       .populate('quizId');
 
@@ -167,15 +116,44 @@ exports.getAttempt = async (req, res) => {
       return res.status(404).json({ message: 'Attempt not found' });
     }
 
-    // Check if user is the attempt owner or quiz creator
-    if (
-      attempt.userId._id.toString() !== req.user._id.toString() &&
-      attempt.quizId.createdBy.toString() !== req.user._id.toString()
-    ) {
+    // Check if user is the attempt owner OR quiz creator OR admin
+    const isAttemptOwner = attempt.userId._id.toString() === req.user._id.toString();
+    const isQuizCreator = attempt.quizId.createdBy.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'admin';
+
+    if (!isAttemptOwner && !isQuizCreator && !isAdmin) {
       return res.status(403).json({ message: 'Access denied' });
     }
 
     res.json(attempt);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Update getQuizAttempts to use quizAuth middleware
+exports.getQuizAttempts = async (req, res) => {
+  try {
+    const quizId = req.params.id;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    
+    // Middleware already verified user is quiz creator
+    const attempts = await Attempt.find({ quizId })
+      .populate('userId', 'username email')
+      .sort({ completedAt: -1 })
+      .skip(skip)
+      .limit(limit);
+    
+    const total = await Attempt.countDocuments({ quizId });
+    
+    res.json({
+      attempts,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalAttempts: total
+    });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }

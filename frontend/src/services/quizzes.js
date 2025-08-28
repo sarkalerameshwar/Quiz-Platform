@@ -5,6 +5,10 @@ export const quizAPI = {
     api.get(`/quizzes?page=${page}&limit=${limit}`),
   
   getQuiz: (id) => api.get(`/quizzes/${id}`),
+
+  // Add this function to the quizAPI object
+getQuizAttempts: (quizId, page = 1, limit = 10) => 
+  api.get(`/attempts/quiz/${quizId}?page=${page}&limit=${limit}`),
   
   getUserQuizzes: (page = 1, limit = 10) => 
     api.get(`/quizzes/user?page=${page}&limit=${limit}`),

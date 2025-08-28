@@ -48,8 +48,15 @@ cd backend
 npm start
 ```
 
+### 4. Preview Frontend (Optional - for testing built version)
+```bash
+cd frontend
+npm run preview
+```
+
 The application will be available at:
-- Frontend: http://localhost:3000
+- Frontend Development: http://localhost:5173 (npm run dev)
+- Frontend Production Preview: http://localhost:4173 (npm run preview) 
 - Backend API: http://localhost:5000
 
 ## Production Deployment

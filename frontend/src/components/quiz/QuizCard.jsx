@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import {FaChartBar} from 'react-icons/fa';
 import {
   FaUser,
   FaClock,
@@ -9,7 +10,13 @@ import {
   FaTrash,
 } from "react-icons/fa";
 
-const QuizCard = ({ quiz, showActions = false, userAttempt, onDelete, isQuizCreator = false }) => {
+const QuizCard = ({
+  quiz,
+  showActions = false,
+  userAttempt,
+  onDelete,
+  isQuizCreator = false,
+}) => {
   const handleDelete = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -27,7 +34,7 @@ const QuizCard = ({ quiz, showActions = false, userAttempt, onDelete, isQuizCrea
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
       transition={{ duration: 0.3 }}
-      style={{ minHeight: '480px' }} // fixed height for uniformity
+      style={{ minHeight: "480px" }} // fixed height for uniformity
     >
       <div className="p-8 flex flex-col justify-between h-full">
         {/* Quiz Title and Description */}
@@ -39,12 +46,13 @@ const QuizCard = ({ quiz, showActions = false, userAttempt, onDelete, isQuizCrea
             {quiz.description || "Test your knowledge with this engaging quiz."}
           </p>
         </div>
-
         {/* Info Section */}
         <div className="grid grid-cols-2 gap-4 mb-6 text-base">
           <div className="flex items-center space-x-3 text-gray-700">
             <FaUser className="text-indigo-500 text-lg" />
-            <span className="font-medium">{quiz.createdBy?.username || "Unknown"}</span>
+            <span className="font-medium">
+              {quiz.createdBy?.username || "Unknown"}
+            </span>
           </div>
           <div className="flex items-center space-x-3 text-gray-700">
             <FaClock className="text-indigo-500 text-lg" />
@@ -52,14 +60,17 @@ const QuizCard = ({ quiz, showActions = false, userAttempt, onDelete, isQuizCrea
           </div>
           <div className="flex items-center space-x-3 text-gray-700">
             <FaClipboardList className="text-indigo-500 text-lg" />
-            <span className="font-medium">{quiz.questions?.length || 0} questions</span>
+            <span className="font-medium">
+              {quiz.questions?.length || 0} questions
+            </span>
           </div>
           <div className="flex items-center space-x-3 text-gray-700">
             <FaTag className="text-indigo-500 text-lg" />
-            <span className="font-medium capitalize">{quiz.category || "General"}</span>
+            <span className="font-medium capitalize">
+              {quiz.category || "General"}
+            </span>
           </div>
         </div>
-
         {/* Attempt Status */}
         {hasAttempt && (
           <motion.div
@@ -68,13 +79,18 @@ const QuizCard = ({ quiz, showActions = false, userAttempt, onDelete, isQuizCrea
             transition={{ duration: 0.2 }}
             className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl"
           >
-            <div className="font-semibold text-blue-800 text-lg mb-2">Quiz Completed</div>
+            <div className="font-semibold text-blue-800 text-lg mb-2">
+              Quiz Completed
+            </div>
             <div className="text-blue-600 text-base">
-              Score: <span className="font-bold">{userAttempt.score}/{userAttempt.totalPoints}</span> • {new Date(userAttempt.completedAt).toLocaleDateString()}
+              Score:{" "}
+              <span className="font-bold">
+                {userAttempt.score}/{userAttempt.totalPoints}
+              </span>{" "}
+              • {new Date(userAttempt.completedAt).toLocaleDateString()}
             </div>
           </motion.div>
         )}
-
         {/* Action Buttons */}
         {showActions && (
           <div className="flex space-x-3 mb-6">
@@ -94,11 +110,26 @@ const QuizCard = ({ quiz, showActions = false, userAttempt, onDelete, isQuizCrea
             </button>
           </div>
         )}
-
+        {/* // Add this import  // Add
+        this button in the showActions section */}
+        {showActions && (
+          <div className="flex space-x-2 mb-4">
+            <Link
+              to={`/quiz-attempts/${quiz._id}`}
+              className="flex-1 bg-purple-600 text-white text-center py-2 px-3 rounded text-sm hover:bg-purple-700 transition-colors flex items-center justify-center"
+            >
+              <FaChartBar className="mr-1" />
+              View Attempts
+            </Link>
+            {/* ... other buttons ... */}
+          </div>
+        )}
         {/* Take/View Quiz Button */}
         {!isQuizCreator && (
           <Link
-            to={hasAttempt ? `/results/${userAttempt._id}` : `/quiz/${quiz._id}`}
+            to={
+              hasAttempt ? `/results/${userAttempt._id}` : `/quiz/${quiz._id}`
+            }
             className={`w-full py-3 rounded-xl text-white text-center transition-colors text-base font-semibold ${
               hasAttempt
                 ? "bg-green-600 hover:bg-green-700 shadow-green"

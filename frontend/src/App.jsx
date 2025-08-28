@@ -12,7 +12,8 @@ import Register from "./components/auth/Register";
 import QuizList from "./components/quiz/QuizList";
 import CreateQuiz from "./components/quiz/CreateQuiz";
 import TakeQuiz from "./components/quiz/TakeQuiz";
-import EditQuiz from './components/quiz/EditQuiz';
+import EditQuiz from "./components/quiz/EditQuiz";
+import QuizAttemptsList from './components/quiz/QuizAttemptsList';
 import Results from "./components/quiz/Results";
 
 function App() {
@@ -22,7 +23,6 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-
           <Route
             path="/"
             element={
@@ -33,7 +33,6 @@ function App() {
               </PrivateRoute>
             }
           />
-
           <Route
             path="/dashboard"
             element={
@@ -44,7 +43,6 @@ function App() {
               </PrivateRoute>
             }
           />
-
           <Route
             path="/create-quiz"
             element={
@@ -55,7 +53,6 @@ function App() {
               </PrivateRoute>
             }
           />
-
           <Route
             path="/quiz/:id"
             element={
@@ -66,7 +63,6 @@ function App() {
               </PrivateRoute>
             }
           />
-
           <Route
             path="/results/:attemptId"
             element={
@@ -83,6 +79,17 @@ function App() {
               <PrivateRoute>
                 <Layout>
                   <EditQuiz />
+                </Layout>
+              </PrivateRoute>
+            }
+          />
+          // Add import  // Add route
+          <Route
+            path="/quiz-attempts/:id"
+            element={
+              <PrivateRoute>
+                <Layout>
+                  <QuizAttemptsList />
                 </Layout>
               </PrivateRoute>
             }

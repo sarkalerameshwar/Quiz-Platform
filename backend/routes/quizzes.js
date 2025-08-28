@@ -11,6 +11,7 @@ const {
 const { auth } = require('../middleware/auth');
 const { validateQuiz } = require('../middleware/validation');
 
+
 router.post('/', auth, validateQuiz, createQuiz);
 router.get('/', getQuizzes);
 router.get('/user', auth, getUserQuizzes);

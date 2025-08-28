@@ -14,3 +14,4 @@ router.get('/quiz/:id', auth, getQuizAttempts);
 router.get('/:attemptId', auth, getAttempt);
 
 module.exports = router;
+// module.exports = router;

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Alert from '../common/Alert';
-import Loader from '../common/Loader';
+import { FaEnvelope, FaLock, FaSignInAlt, FaBrain } from 'react-icons/fa';
 
 const Login = () => {
   const [credentials, setCredentials] = useState({
@@ -10,9 +10,9 @@ const Login = () => {
     password: ''
   });
   const [errors, setErrors] = useState({});
-  const [generalError, setGeneralError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const { login, loading } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -20,23 +20,19 @@ const Login = () => {
       ...credentials,
       [e.target.name]: e.target.value
     });
-    setErrors((prev) => ({ ...prev, [e.target.name]: '' }));
-    setGeneralError('');
   };
 
   const validateForm = () => {
     const newErrors = {};
 
-    if (!credentials.email) {
+    if (!credentials.email.trim()) {
       newErrors.email = 'Email is required';
-    } else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(credentials.email)) {
-      newErrors.email = 'Invalid email address';
+    } else if (!/^\S+@\S+\.\S+$/.test(credentials.email)) {
+      newErrors.email = 'Please enter a valid email address';
     }
 
     if (!credentials.password) {
       newErrors.password = 'Password is required';
-    } else if (credentials.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
     }
 
     setErrors(newErrors);
@@ -45,85 +41,150 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setGeneralError('');
-
     if (!validateForm()) return;
+
+    setLoading(true);
+    setErrors({});
 
     try {
       const result = await login(credentials);
-
       if (result.success) {
         navigate('/dashboard');
       } else {
-        setGeneralError(result.error || 'Failed to login. Please try again.');
+        setErrors({ general: result.error || 'Invalid email or password' });
       }
     } catch (err) {
-      setGeneralError('Something went wrong. Please try again later.');
+      setErrors({ general: 'Something went wrong. Please try again later.' });
     }
+    setLoading(false);
   };
 
-  if (loading) return <Loader />;
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-indigo-50 to-white px-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 space-y-6 transition transform hover:scale-[1.01]">
-
-        {/* Heading */}
-        <div className="text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900">Welcome Back</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Sign in to access your account 🚀
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-50 px-4 py-8">
+      <div className="max-w-md w-full">
+        {/* Header Section */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center mb-4">
+            <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <FaBrain className="w-8 h-8 text-white" />
+            </div>
+          </div>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            Quiz<span className="text-blue-600">Platform</span>
+          </h1>
+          <p className="text-gray-600 text-lg">
+            Welcome back! Test your knowledge and grow
           </p>
         </div>
 
-        {/* Form */}
-        <form className="space-y-5" onSubmit={handleSubmit} noValidate>
-          {generalError && <Alert type="error" message={generalError} />}
-
-          {/* Email */}
-          <div>
-            <input
-              name="email"
-              type="email"
-              placeholder="Email address"
-              value={credentials.email}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder-gray-400 shadow-sm transition"
-            />
-            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+        {/* Form Container */}
+        <div className="bg-white rounded-3xl shadow-2xl p-8 space-y-6 border border-gray-100">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900">Sign In to Your Account</h2>
+            <p className="text-gray-500 mt-2">Continue your learning journey</p>
           </div>
 
-          {/* Password */}
-          <div>
-            <input
-              name="password"
-              type="password"
-              placeholder="Password"
-              value={credentials.password}
-              onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 placeholder-gray-400 shadow-sm transition"
-            />
-            {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
-          </div>
+          {errors.general && (
+            <Alert type="error" message={errors.general} onClose={() => setErrors({})} />
+          )}
 
-          {/* Submit Button */}
-          <div>
+          <form className="space-y-5" onSubmit={handleSubmit}>
+            {/* Email Field */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 flex items-center">
+                <FaEnvelope className="w-4 h-4 mr-2 text-blue-600" />
+                Email Address
+              </label>
+              <input
+                name="email"
+                type="email"
+                placeholder="Enter your email"
+                value={credentials.email}
+                onChange={handleChange}
+                className={`w-full px-4 py-3 rounded-xl border-2 ${
+                  errors.email ? 'border-red-500' : 'border-gray-200 hover:border-blue-300'
+                } focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200`}
+              />
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              )}
+            </div>
+
+            {/* Password Field */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 flex items-center">
+                <FaLock className="w-4 h-4 mr-2 text-blue-600" />
+                Password
+              </label>
+              <input
+                name="password"
+                type="password"
+                placeholder="Enter your password"
+                value={credentials.password}
+                onChange={handleChange}
+                className={`w-full px-4 py-3 rounded-xl border-2 ${
+                  errors.password ? 'border-red-500' : 'border-gray-200 hover:border-blue-300'
+                } focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200`}
+              />
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+              )}
+              
+              <div className="text-right">
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-blue-600 hover:text-blue-700 underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+            </div>
+
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-500 text-white font-medium shadow-lg hover:from-indigo-700 hover:to-indigo-600 transition transform hover:scale-[1.02] disabled:opacity-50"
+              className="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl shadow-lg hover:from-blue-700 hover:to-indigo-700 transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:transform-none flex items-center justify-center space-x-2"
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Signing In...</span>
+                </>
+              ) : (
+                <>
+                  <FaSignInAlt className="w-5 h-5" />
+                  <span>Sign In to Continue</span>
+                </>
+              )}
             </button>
-          </div>
+          </form>
 
-          {/* Footer */}
-          <div className="text-center">
-            <Link to="/register" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">
-              Don’t have an account? <span className="underline">Sign up</span>
-            </Link>
+          {/* Register Link */}
+          <div className="text-center pt-4 border-t border-gray-100">
+            <p className="text-gray-600">
+              Don't have an account?{' '}
+              <Link
+                to="/register"
+                className="text-blue-600 font-semibold hover:text-blue-700 underline transition-colors"
+              >
+                Create account here
+              </Link>
+            </p>
           </div>
-        </form>
+        </div>
+
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 gap-4 mt-8 text-center">
+          <div className="bg-white rounded-2xl p-4 shadow-md">
+            <div className="text-2xl font-bold text-blue-600">10K+</div>
+            <p className="text-sm text-gray-600">Active Users</p>
+          </div>
+          <div className="bg-white rounded-2xl p-4 shadow-md">
+            <div className="text-2xl font-bold text-indigo-600">500+</div>
+            <p className="text-sm text-gray-600">Quizzes</p>
+          </div>
+        </div>
       </div>
     </div>
   );
